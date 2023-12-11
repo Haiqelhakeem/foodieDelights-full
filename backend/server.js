@@ -5,39 +5,64 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const UserRoute = require('./routes/UserRoute');
 const PlaceRoute = require('./routes/PlaceRoute');
+const Place = require('./models/PlaceModel');
 
-//express app
+// Express app
 const app = express();
 
-//connect to db
-mongoose.connect("mongodb://localhost:27017/FoodieDelights")
-const db = mongoose.connection;
-db.on('error', (err) => {
-    console.log(err)
+require("./utils/db");
+
+// app.get('/', (req, res) => {
+//     res.render('LoginPage', {
+//         title: 'Login',
+//         layout: "../frontend/src/pages/LoginPage.jsx"
+//     })
+// })
+
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  next();
 });
-db.once('open', () => {
-    console.log('connected to db');
+
+//halaman explore
+app.get('/places', async (req, res) => {
+  Place.find().then((places) => {
+    res.send(places);
+  })
+
+    // const places = await Place.find();
+
+    // res.render('Explore', {
+    //     title: 'Explore',
+    //     layout: "../frontend/src/pages/Explore.jsx",
+    //     places
+    // })
 })
 
+
+// Middleware
 app.use(express.json());
 app.use(cors());
-app.use(UserRoute);
-app.use(PlaceRoute);
+// app.use(UserRoute);
+// app.use(PlaceRoute);
+// // Handle /explore route
+// app.use('/api', PlaceRoute);
 
-//middleware
-app.use((req, res, next) => {
-    console.log(req.path, req.method)
-    next()
-})
+// Middleware for logging
+// app.use((req, res, next) => {
+//   console.log(req.path, req.method);
+//   next();
+// });
 
-app.use('/explore', PlaceRoute)
-
-//routing
+// Routing
 app.get('/', (req, res) => {
-    res.json({mssg: 'Hello World'})
-})
+  res.json({ message: 'Hello World' });
+});
 
-//listen for app
-app.listen(process.env.PORT, () => {
-    console.log('Listening on port', process.env.PORT)
-})
+
+
+// Listen for app
+const PORT = process.env.PORT;
+app.listen(PORT, () => {
+  console.log('Listening on port', PORT);
+});
